@@ -37,7 +37,7 @@ Why do we care?
 
 Let's imagine we added the filter feature to our reviews page:
 
-![reviews filter](reviews-filter.png)
+![reviews filter](https://raw.githubusercontent.com/learn-co-curriculum/phase-4-nested-resource-routing/master/reviews-filter.png)
 
 When the filter is active, we can make a request to our backend to retrieve
 only the reviews that match the selected dog house:
