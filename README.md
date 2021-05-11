@@ -51,7 +51,7 @@ conventions.
 ### Dynamic Route Segments
 
 What we'd love to end up with here is something like `/dog_house/1/reviews` for
-all of an dog house's reviews and `/dog_house/1/reviews/5` to see an individual
+all of a dog house's reviews and `/dog_house/1/reviews/5` to see an individual
 review for that dog house.
 
 We know we can build out a route with dynamic segments, so our first instinct
@@ -191,10 +191,11 @@ Let's update `index` and `show` to account for the new routes:
   end
 ```
 
-We added a conditional to the `reviews#index` action to account for whether the
+We added a condition to the `reviews#index` action to account for whether the
 user is trying to access the index of _all_ reviews (`Review.all`) or just the
-index of all reviews _for a certain dog house_ (`dog_house.reviews`). The
-conditional hinges on whether there's an `:dog_house_id` key in the `params`
+index of all reviews _for a certain dog house_ (`dog_house.reviews`).
+
+The condition hinges on whether there's an `:dog_house_id` key in the `params`
 hash &mdash; in other words, whether the user navigated to
 `/dog_houses/:dog_house_id/reviews` or simply `/reviews`. We didn't have to
 create any new methods or make explicit calls to render new data. We just added
@@ -204,10 +205,27 @@ Where is `params[:dog_house_id]` coming from? Rails provides it for us through
 the nested route, so we don't have to worry about a collision with the `:id`
 parameter that `reviews#show` is looking for. Rails takes the parent resource's
 name and appends `_id` to it for a nice, predictable way to find the parent
-resource's ID.
+resource's ID. Since some of our review routes are nested like this:
 
-But wait: we didn't make a single change to the `reviews#show` action. What
-about the new `/dog_house_id/:dog_house_id/reviews/:id` route that we added?
+```rb
+resources :dog_houses, only: [:show] do
+  resources :reviews, only: [:show, :index]
+end
+```
+
+We end up with these routes for reviews (notice the dynamic portions of the URI
+Patterns):
+
+```txt
+Verb  URI Pattern                                     Controller#Action
+GET   /dog_houses/:dog_house_id/reviews               reviews#index
+GET   /dog_houses/:dog_house_id/reviews/:id           reviews#show
+```
+
+You'll also notice we didn't make a single change to the `reviews#show` action.
+What about the new `/dog_house_id/:dog_house_id/reviews/:id` route that we
+added?
+
 Remember, the point of nesting our resources is to DRY up our code. We had to
 create a conditional for the `reviews#index` action because it renders
 _different_ sets of reviews depending on the path,
