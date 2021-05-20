@@ -9,7 +9,7 @@
 ## Introduction
 
 We're going to keep working on our AirBudNB application, augmenting it to filter
-reviews by listing in a more user-friendly and RESTful way.
+reviews by listing in a user-friendly and RESTful way.
 
 To set up the app, run:
 
@@ -32,7 +32,7 @@ know the dog house's `id`) by going to `/dog_house/:id`.
 
 Why do we care?
 
-Let's imagine we added the filter feature to our reviews page:
+Let's imagine we added a filter feature to our reviews page:
 
 ![reviews filter](https://raw.githubusercontent.com/learn-co-curriculum/phase-4-nested-resource-routing/master/reviews-filter.png)
 
@@ -56,6 +56,7 @@ might be to just define these in `routes.rb` like this:
 
 ```ruby
 # config/routes.rb
+  ...
   get '/dog_house/:dog_house_id/reviews'
   get '/dog_house/:dog_house_id/reviews/:review_id'
 ```
@@ -68,15 +69,18 @@ handle them. Okay, let's make it look more like this:
 
 ```ruby
 # config/routes.rb
-
+  ...
   get '/dog_houses/:dog_house_id/reviews', to: 'dog_houses#reviews_index'
   get '/dog_houses/:dog_house_id/reviews/:id', to: 'dog_houses#review'
 ```
 
-And to handle our new filtering routes, we'll need to make some changes in our `dog_houses_controller` to actually do the work.
+And to handle our new filtering routes, we'll need to add some code in our
+`dog_houses_controller` to actually do the work.
 
 ```ruby
   # app/controllers/dog_houses_controller.rb
+  ...
+
   def reviews_index
     dog_house = DogHouse.find(params[:dog_house_id])
     reviews = dog_house.reviews
@@ -96,13 +100,14 @@ We did it! We have much nicer URLs now. Are we done? Of course not.
 
 If we look at our `routes.rb`, we can already see it getting messy. Instead of
 something nice like `resources :dog_houses`, now we're specifying controller
-actions and HTTP verbs just to do a simple filter of an dog house's reviews.
+actions and HTTP verbs just to do a simple filter of a dog house's reviews.
 
 Beyond that, our DRY (Don't Repeat Yourself) and Separation of Concerns klaxons
 should be wailing because the code to find all reviews and to find individual
-reviews by their ID is essentially repeated in the `dog_houses_controller`.
-These aren't really the concerns of the `dog_houses_controller`, and we can tell
-that because we're directly rendering `Review`-related data.
+reviews by their ID is essentially repeated in both the `reviews_controller` and
+the `dog_houses_controller`. These aren't really the concern of the
+`dog_houses_controller`, and we can tell that because we're directly rendering
+`Review`-related data.
 
 Seems like Rails would have a way to bail us out of this mess.
 
@@ -112,7 +117,7 @@ Turns out, Rails _does_ give us a way to make this a lot nicer.
 
 If we look again at our models, we see that a dog house `has_many :reviews` and
 a review `belongs_to :dog_house`. Since a review can logically be considered a
-_child_ object to a dog house, it can also be considered a _nested resource_ of
+_child_ object of a dog house, it can also be considered a _nested resource_ of
 a dog house for routing purposes.
 
 Nested resources give us a way to document that parent/child relationship in our
@@ -142,9 +147,9 @@ We can still do things to the nested resources that we do to a non-nested
 resource, like limit them to only certain actions. In this case, we only want to
 nest `:show` and `:index` under `:dog_houses`.
 
-Under that, we still have our regular resourced `:reviews` routes because we
-still want to let people see all reviews or a single review, create reviews and
-so on outside of the context of a dog house.
+Below that, we still have our regular resourced `:reviews` routes because we
+still want to let people see all reviews or a single review, create reviews,
+etc., outside of the context of a dog house.
 
 You can see the routes available by running `rails routes`:
 
@@ -165,7 +170,7 @@ related to reviews, so Separation of Concerns tells us to put that code in the
 `:index`, we won't be repeating ourselves like we did in the
 `dog_houses_controller`.
 
-Let's update `index` and `show` to account for the new routes:
+Let's update `index` to account for the new routes:
 
 ```ruby
 # app/controllers/reviews_controller.rb
@@ -179,22 +184,13 @@ Let's update `index` and `show` to account for the new routes:
     end
     render json: reviews, include: :dog_house
   end
-
-  def show
-    review = Review.find(params[:id])
-    if review
-      render json: review, include: :dog_house
-    else
-      render json: { error: "Review not found" }, status: :not_found
-    end
-  end
 ```
 
 We added a condition to the `reviews#index` action to account for whether the
 user is trying to access the index of _all_ reviews (`Review.all`) or just the
 index of all reviews _for a certain dog house_ (`dog_house.reviews`).
 
-The condition hinges on whether there's an `:dog_house_id` key in the `params`
+The condition hinges on whether there's a `:dog_house_id` key in the `params`
 hash — in other words, whether the user navigated to
 `/dog_houses/:dog_house_id/reviews` or simply `/reviews`. We didn't have to
 create any new methods or make explicit calls to render new data. We just added
@@ -287,7 +283,7 @@ Now we're getting into messy territory. Our URL is
 controller.
 
 But if we lean on our old friend Separation of Concerns, we can conclude that a
-reviews's comments are not the concern of an dog house and therefore don't
+reviews's comments are not the concern of a dog house and therefore don't
 belong nested two levels deep under the `:dog_houses` resource.
 
 In addition, the reason to put the ID of the resource in the URL is so that we
