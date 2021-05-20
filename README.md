@@ -30,9 +30,6 @@ browsing to `/reviews` will show us the index of all `Review` objects. And if we
 want to view a specific `DogHouse`, we can guess the URL for that (as long as we
 know the dog house's `id`) by going to `/dog_house/:id`.
 
-**Top-tip:** the `/:id` notation above represents a _dynamic_ route segment,
-which we've touched on before and will be seeing more of in this reading.
-
 Why do we care?
 
 Let's imagine we added the filter feature to our reviews page:
@@ -134,7 +131,7 @@ Rails.application.routes.draw do
     resources :reviews, only: [:show, :index]
   end
 
-  resources :reviews, only: [:index, :create, :update]
+  resources :reviews, only: [:show, :index, :create]
 end
 ```
 
@@ -146,8 +143,8 @@ resource, like limit them to only certain actions. In this case, we only want to
 nest `:show` and `:index` under `:dog_houses`.
 
 Under that, we still have our regular resourced `:reviews` routes because we
-still want to let people see all reviews, create and edit reviews, and so on
-outside of the context of a dog house.
+still want to let people see all reviews or a single review, create reviews and
+so on outside of the context of a dog house.
 
 You can see the routes available by running `rails routes`:
 
@@ -158,8 +155,6 @@ dog_house_reviews GET   /dog_houses/:dog_house_id/reviews(.:format)     reviews#
         dog_house GET   /dog_houses/:id(.:format)                       dog_houses#show
           reviews GET   /reviews(.:format)                              reviews#index
                   POST  /reviews(.:format)                              reviews#create
-           review PATCH /reviews/:id(.:format)                          reviews#update
-                  PUT   /reviews/:id(.:format)                          reviews#update
 ```
 
 Now we need to update our `reviews_controller` to handle the nested resource we
@@ -182,12 +177,16 @@ Let's update `index` and `show` to account for the new routes:
     else
       reviews = Review.all
     end
-    render json: reviews, include: :dog_houses
+    render json: reviews, include: :dog_house
   end
 
   def show
     review = Review.find(params[:id])
-    render json: review, include: :dog_houses
+    if review
+      render json: review, include: :dog_house
+    else
+      render json: { error: "Review not found" }, status: :not_found
+    end
   end
 ```
 
@@ -196,7 +195,7 @@ user is trying to access the index of _all_ reviews (`Review.all`) or just the
 index of all reviews _for a certain dog house_ (`dog_house.reviews`).
 
 The condition hinges on whether there's an `:dog_house_id` key in the `params`
-hash &mdash; in other words, whether the user navigated to
+hash — in other words, whether the user navigated to
 `/dog_houses/:dog_house_id/reviews` or simply `/reviews`. We didn't have to
 create any new methods or make explicit calls to render new data. We just added
 a simple check for `params[:dog_house_id]`, and we're good to go.
@@ -230,8 +229,8 @@ Remember, the point of nesting our resources is to DRY up our code. We had to
 create a conditional for the `reviews#index` action because it renders
 _different_ sets of reviews depending on the path,
 `/dog_house_id/:dog_house_id/reviews` or `/reviews`. Conversely, the
-`reviews#show` route is going to render the _same_ information &mdash; data
-concerning a single review &mdash; regardless of whether it is accessed via
+`reviews#show` route is going to render the _same_ information — data concerning
+a single review — regardless of whether it is accessed via
 `/dog_house_id/:dog_house_id/reviews` or `/reviews/:id`.
 
 For good measure, let's go into our `dog_houses_controller.rb` and delete the
