@@ -28,7 +28,7 @@ that access to specific resources is predictable and standardized.
 In practice, that means that, if we type `rails s` and run our app,
 browsing to `/reviews` will show us the index of all `Review` objects. And if we
 want to view a specific `DogHouse`, we can guess the URL for that (as long as we
-know the dog house's `id`) by going to `/dog_house/:id`.
+know the dog house's `id`) by going to `/dog_houses/:id`.
 
 Why do we care?
 
@@ -36,8 +36,8 @@ Let's imagine we added a filter feature to our reviews page:
 
 ![reviews filter](https://raw.githubusercontent.com/learn-co-curriculum/phase-4-nested-resource-routing/master/reviews-filter.png)
 
-When the filter is active, we can make a request to our backend to retrieve
-only the reviews that match the selected dog house:
+When the filter is active, we _could_ make a request to our backend, using query
+parameters, to retrieve only the reviews that match the selected dog house:
 
 `http://localhost:3000/reviews?doghouse=1`
 
@@ -47,8 +47,8 @@ conventions.
 
 ### Dynamic Route Segments
 
-What we'd love to end up with here is something like `/dog_house/1/reviews` for
-all of a dog house's reviews and `/dog_house/1/reviews/5` to see an individual
+What we'd love to end up with here is something like `/dog_houses/1/reviews` for
+all of a dog house's reviews and `/dog_houses/1/reviews/5` to see an individual
 review for that dog house.
 
 We know we can build out a route with dynamic segments, so our first instinct
@@ -57,12 +57,12 @@ might be to just define these in `routes.rb` like this:
 ```ruby
 # config/routes.rb
   ...
-  get '/dog_house/:dog_house_id/reviews'
-  get '/dog_house/:dog_house_id/reviews/:review_id'
+  get '/dog_houses/:dog_house_id/reviews'
+  get '/dog_houses/:dog_house_id/reviews/:review_id'
 ```
 
 After adding those routes, let's check it out by browsing to
-`/dog_house/1/reviews`.
+`/dog_houses/1/reviews`.
 
 Oops. Error. Gotta tell those routes explicitly which controller actions will
 handle them. Okay, let's make it look more like this:
@@ -163,12 +163,12 @@ dog_house_reviews GET   /dog_houses/:dog_house_id/reviews(.:format)     reviews#
 ```
 
 Now we need to update our `reviews_controller` to handle the nested resource we
-just set up. Notice how now we are dealing with the `reviews_controller` rather
-than the `dog_houses_controller`. Ultimately, the resource we're requesting is
-related to reviews, so Separation of Concerns tells us to put that code in the
-`reviews_controller`. And, since we already have actions to handle `:show` and
-`:index`, we won't be repeating ourselves like we did in the
-`dog_houses_controller`.
+just set up. Notice, in the 'Controller#Action' column, how now we are dealing
+with the `reviews_controller` rather than the `dog_houses_controller` for our
+nested routes. Ultimately, the resource we're requesting is related to reviews,
+so Separation of Concerns tells us to put that code in the `reviews_controller`.
+And, since we already have actions to handle `:show` and `:index`, we won't be
+repeating ourselves like we did in the `dog_houses_controller`.
 
 Let's update `index` to account for the new routes:
 
