@@ -13,10 +13,10 @@ reviews by listing in a user-friendly and RESTful way.
 
 To set up the app, run:
 
-```sh
-bundle install
-rails db:migrate db:seed
-rails s
+```console
+$ bundle install
+$ rails db:migrate db:seed
+$ rails s
 ```
 
 ### URL As Data
@@ -54,7 +54,7 @@ review for that dog house.
 We know we can build out a route with dynamic segments, so our first instinct
 might be to just define these in `routes.rb` like this:
 
-```ruby
+```rb
 # config/routes.rb
   ...
   get '/dog_houses/:dog_house_id/reviews'
@@ -67,7 +67,7 @@ After adding those routes, let's check it out by browsing to
 Oops. Error. Gotta tell those routes explicitly which controller actions will
 handle them. Okay, let's make it look more like this:
 
-```ruby
+```rb
 # config/routes.rb
   ...
   get '/dog_houses/:dog_house_id/reviews', to: 'dog_houses#reviews_index'
@@ -77,7 +77,7 @@ handle them. Okay, let's make it look more like this:
 And to handle our new filtering routes, we'll need to add some code in our
 `dog_houses_controller` to actually do the work.
 
-```ruby
+```rb
   # app/controllers/dog_houses_controller.rb
   ...
 
@@ -126,7 +126,7 @@ routes and, ultimately, our URLs.
 Let's get back into `routes.rb`, delete the two routes we just added, and
 recreate them as nested resources. We should end up with something like this:
 
-```ruby
+```rb
 # config/routes.rb
 
 Rails.application.routes.draw do
@@ -172,7 +172,7 @@ repeating ourselves like we did in the `dog_houses_controller`.
 
 Let's update `index` to account for the new routes:
 
-```ruby
+```rb
 # app/controllers/reviews_controller.rb
 
   def index
@@ -233,7 +233,7 @@ For good measure, let's go into our `dog_houses_controller.rb` and delete the
 two actions (`review` and `reviews_index`) that we added above so that it looks like
 this:
 
-```ruby
+```rb
 # app/controllers/dog_houses_controller.rb
 class DogHousesController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found_response
@@ -262,7 +262,7 @@ You can nest resources more than one level deep, but that is generally a bad ide
 
 Imagine if we also had comments on a review. This would be a perfectly fine use of nesting:
 
-```ruby
+```rb
 resources :reviews do
   resources :comments
 end
@@ -273,7 +273,7 @@ a lot of sense.
 
 But if we then tried to add to our already nested `reviews` resource...
 
-```ruby
+```rb
 resources :dog_houses do
   resources :reviews do
     resources :comments
@@ -293,7 +293,7 @@ In addition, the reason to put the ID of the resource in the URL is so that we
 have access to it in the controller. If we know we have the review with an ID of
 `1`, we can use our Active Record relationships to call:
 
-```ruby
+```rb
   review = Review.find(params[:id])
   review.dog_house
   # This will tell us which dog house the review was for!
