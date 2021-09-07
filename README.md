@@ -96,18 +96,20 @@ And to handle our new filtering routes, we'll need to add some code in our
 **Note:** If your IDs are different and you are having trouble with the URLs,
 try running `rails db:reset` to reset your database.
 
-We did it! We have much nicer URLs now. Are we done? Of course not.
+We did it! We have much nicer URLs now. Are we done? Of course not. While this
+setup will work, there are a couple of problems.
 
-If we look at our `routes.rb`, we can already see it getting messy. Instead of
-something nice like `resources :dog_houses`, now we're specifying controller
-actions and HTTP verbs just to do a simple filter of a dog house's reviews.
+First, if we look at our `routes.rb`, we've had to move away from using the
+preferred `resources` option and are now specifying HTTP verbs, routes, and
+controller actions. Given that implementing a filter is a fairly common task,
+this is not ideal.
 
-Beyond that, our DRY (Don't Repeat Yourself) and Separation of Concerns klaxons
-should be wailing because the code to find all reviews and to find individual
-reviews by their ID is essentially repeated in both the `reviews_controller` and
-the `dog_houses_controller`. These aren't really the concern of the
-`dog_houses_controller`, and we can tell that because we're directly rendering
-`Review`-related data.
+Beyond that, note that our `dog_houses_controller` is now responsible for
+rendering reviews, which shouldn't be its responsibility. Furthermore, the code
+to find all reviews and to find individual reviews by their ID is essentially
+repeated in both the `reviews_controller` and the `dog_houses_controller`. Our
+current code is violating both the DRY (Don't Repeat Yourself) and Separation of
+Concerns principles.
 
 Seems like Rails would have a way to bail us out of this mess.
 
@@ -162,15 +164,14 @@ dog_house_reviews GET   /dog_houses/:dog_house_id/reviews(.:format)     reviews#
                   POST  /reviews(.:format)                              reviews#create
 ```
 
-Now we need to update our `reviews_controller` to handle the nested resource we
-just set up. Notice, in the 'Controller#Action' column, how now we are dealing
-with the `reviews_controller` rather than the `dog_houses_controller` for our
-nested routes. Ultimately, the resource we're requesting is related to reviews,
-so Separation of Concerns tells us to put that code in the `reviews_controller`.
-And, since we already have actions to handle `:show` and `:index`, we won't be
-repeating ourselves like we did in the `dog_houses_controller`.
+Notice, in the 'Controller#Action' column, how now we are dealing with the
+`reviews_controller` rather than the `dog_houses_controller` for our nested
+routes — our code once again reflects good Separation of Concerns. And, since we
+already have actions in `reviews_controller` to handle `:show` and `:index`, we
+won't be repeating ourselves like we did in the `dog_houses_controller`.
 
-Let's update `index` to account for the new routes:
+Now we just need to update our `reviews_controller` to handle the nested
+resource. Let's update `index` to account for the new routes:
 
 ```rb
 # app/controllers/reviews_controller.rb
