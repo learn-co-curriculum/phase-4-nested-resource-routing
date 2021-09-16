@@ -310,6 +310,14 @@ relationships in your system.
 However, as a general rule, you should only nest resources one level deep and
 ensure that you are considering Separation of Concerns in your routing.
 
+## Check For Understanding
+
+Before you move on, make sure you can answer the following questions:
+
+1. What are the benefits of using nested routes?
+2. How do we distinguish nested routes from parent routes in our `routes.rb`
+   file?
+
 ## Resources
 
 - [Routing: Nested Resources](https://guides.rubyonrails.org/routing.html#nested-resources)
