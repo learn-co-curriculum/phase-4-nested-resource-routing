@@ -314,7 +314,7 @@ ensure that you are considering Separation of Concerns in your routing.
 
 Before you move on, make sure you can answer the following questions:
 
-1. What are the steps to implement a nested route in Rails?
+1. What are the benefits of using nested routes?
 2. How do we distinguish nested routes from parent routes in our `routes.rb`
    file?
 
