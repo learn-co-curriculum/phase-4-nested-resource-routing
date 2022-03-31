@@ -219,16 +219,16 @@ GET   /dog_houses/:dog_house_id/reviews/:id           reviews#show
 ```
 
 You'll also notice we didn't make a single change to the `reviews#show` action.
-What about the new `/dog_house_id/:dog_house_id/reviews/:id` route that we
+What about the new `/dog_houses/:dog_house_id/reviews/:id` route that we
 added?
 
 Remember, the point of nesting our resources is to DRY up our code. We had to
 create a conditional for the `reviews#index` action because it renders
 _different_ sets of reviews depending on the path,
-`/dog_house_id/:dog_house_id/reviews` or `/reviews`. Conversely, the
+`/dog_houses/:dog_house_id/reviews` or `/reviews`. Conversely, the
 `reviews#show` route is going to render the _same_ information — data concerning
 a single review — regardless of whether it is accessed via
-`/dog_house_id/:dog_house_id/reviews` or `/reviews/:id`.
+`/dog_houses/:dog_house_id/reviews` or `/reviews/:id`.
 
 For good measure, let's go into our `dog_houses_controller.rb` and delete the
 two actions (`review` and `reviews_index`) that we added above so that it looks like
@@ -261,7 +261,8 @@ unused code.
 
 You can nest resources more than one level deep, but that is generally a bad idea.
 
-Imagine if we also had comments on a review. This would be a perfectly fine use of nesting:
+Imagine if we also had comments on a review. This would be a perfectly fine use
+of nesting:
 
 ```rb
 resources :reviews do
