@@ -261,7 +261,8 @@ unused code.
 
 You can nest resources more than one level deep, but that is generally a bad idea.
 
-Imagine if we also had comments on a review. This would be a perfectly fine use of nesting:
+Imagine if we also had comments on a review. This would be a perfectly fine use
+of nesting:
 
 ```rb
 resources :reviews do
